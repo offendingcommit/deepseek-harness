@@ -1,0 +1,30 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": ["packages/*/lib/**", "lib/**", "*.tsbuildinfo"]
+    },
+    "release:bump": {
+      "cache": false
+    },
+    "release:commit": {
+      "cache": false
+    },
+    "release:assemble-prebuilds": {
+      "cache": false
+    },
+    "release:verify": {
+      "cache": false
+    },
+    "release:pack": {
+      "cache": false
+    },
+    "release:publish": {
+      "cache": false
+    },
+    "release:verify-packed-install": {
+      "cache": false
+    }
+  }
+}
