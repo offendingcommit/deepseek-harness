@@ -124,6 +124,12 @@ The keyless [CI workflow](../.github/workflows/ci.yml) groups independent gates 
 
 The root [contributor instructions](../AGENTS.md#commands) summarize common commands, while [`package.json`](../package.json) and [scripts/run-gates.ts](../scripts/run-gates.ts) own the current script and gate inventories. Select the smallest checks that cover the changed surface. Documentation changes use `pnpm run doc-sync`; package-public behavior changes also update the owning README or JSDoc, and built-artifact checks require `pnpm run build` first.
 
+### Command runners: turbo and just
+
+`turbo` and `just` are command runners over the same build steps. `pnpm run <script>` stays the canonical full-repository command; the build-chain scripts (`build`, `build:lib`, `typecheck`, `lint`, `doc-typecheck`) delegate their sequencing to turbo, and the remaining scripts are unchanged.
+
+`turbo` (Turborepo, a root devDependency) owns ordering and the per-package task graph declared in [`turbo.json`](../turbo.json). `pnpm run build` runs `turbo run build:lib:host build:lib:client build:web`, where `dependsOn` orders `build:lib:client` after `build:lib:host` and `build:web` after the lib phase — the sequencing the scripts previously encoded with `&&`. The lib phases stay uncached because the Host and Client faces write into the same per-package `lib/` directories. `turbo run build` fans out to every package defining `build` (`apps/web`, `website`, `native/landlock-run`) after the lib phase; `turbo run bundle` bundles every package defining `bundle` in parallel with caching. Package-level `turbo.json` files (`extends: ["//"]`) refine the root task config where a package differs: `apps/web/` (build outputs `dist/**`, persistent `dev`/`watch`), `website/` (build outputs `.dist/**`, persistent `dev`/`preview`), and `native/landlock-run/` (build outputs and uncached `release:*` steps); the uniform `bundle`/`watch` config stays at the root. `just` ([`justfile`](../justfile)) adds short recipes over the same commands (`just build`, `just test`, `just typecheck`, `just lint`, `just bundle`, `just watch`, `just docs-dev`, `just dev-web`), each delegating to a pnpm or turbo invocation; `just` installs with Homebrew (`brew install just`).
+
 ### Demos
 
 Run the repository build separately before using these source-checkout demos:

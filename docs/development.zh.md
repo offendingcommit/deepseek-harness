@@ -124,6 +124,12 @@ keyless [CI 工作流](../.github/workflows/ci.yml) 将独立门禁分组到若�
 
 根目录的[贡献者说明](../AGENTS.md#commands)概述常用命令，[`package.json`](../package.json) 与 [scripts/run-gates.ts](../scripts/run-gates.ts) 则负责当前脚本和门禁清单。请选择覆盖变更表面的最小检查集。文档变更使用 `pnpm run doc-sync`；包公开行为变更还需更新所属 README 或 JSDoc，而基于构建产物的检查需要先运行 `pnpm run build`。
 
+### 命令运行器：turbo 与 just
+
+`turbo` 与 `just` 是在相同构建步骤之上的命令运行器。`pnpm run <script>` 仍是规范的仓库级命令；构建链脚本（`build`、`build:lib`、`typecheck`、`lint`、`doc-typecheck`）把它们的排序委托给 turbo，其余脚本保持不变。
+
+`turbo`（Turborepo，根 devDependency）负责排序与 [`turbo.json`](../turbo.json) 中声明的按包任务图。`pnpm run build` 运行 `turbo run build:lib:host build:lib:client build:web`，其中 `dependsOn` 让 `build:lib:client` 排在 `build:lib:host` 之后、`build:web` 排在 lib 阶段之后——这正是脚本原先用 `&&` 编码的顺序。lib 阶段保持不缓存，因为 Host 与 Client 两个面写入同一个按包 `lib/` 目录。`turbo run build` 在 lib 阶段之后扇出到每个定义了 `build` 的包（`apps/web`、`website`、`native/landlock-run`）；`turbo run bundle` 并行打包每个定义了 `bundle` 的包并启用缓存。包级 `turbo.json` 文件（`extends: ["//"]`）在包有差异处细化根任务配置：`apps/web/`（构建输出 `dist/**`，持久 `dev`/`watch`）、`website/`（构建输出 `.dist/**`，持久 `dev`/`preview`）与 `native/landlock-run/`（构建输出与不缓存的 `release:*` 步骤）；统一的 `bundle`/`watch` 配置保留在根目录。`just`（[`justfile`](../justfile))为相同命令提供简短配方（`just build`、`just test`、`just typecheck`、`just lint`、`just bundle`、`just watch`、`just docs-dev`、`just dev-web`），每个配方都委托给一次 pnpm 或 turbo 调用；`just` 可通过 Homebrew 安装（`brew install just`）。
+
 ### 演示
 
 从源码 checkout 运行这些演示前，请单独执行仓库构建：
