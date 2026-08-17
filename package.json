@@ -17,18 +17,18 @@
     "website"
   ],
   "scripts": {
-    "build": "npm run build:lib && npm run build:web",
-    "build:lib": "npm run build:lib:host && npm run build:lib:client",
+    "build": "turbo run build:lib:host build:lib:client build:web",
+    "build:lib": "turbo run build:lib:host build:lib:client",
     "build:lib:host": "tsc -b tsconfig.host.json && tsdown --env.DSH_BUILD_FACE host",
     "build:lib:client": "tsc -b tsconfig.client.json && tsdown --env.DSH_BUILD_FACE client",
     "build:web": "pnpm --filter @deepseek-ai/dsh-web-frontend run build",
     "clean": "tsx scripts/clean.ts",
     "change-scope": "tsx scripts/change-scope.ts",
-    "typecheck": "npm run build:lib:host && npm run typecheck:contracts-ready",
+    "typecheck": "turbo run build:lib:host typecheck:contracts-ready",
     "typecheck:contracts-ready": "tsc -b tsconfig.client.json",
-    "lint": "npm run build:lib:host && npm run lint:contracts-ready",
+    "lint": "turbo run build:lib:host lint:contracts-ready",
     "lint:contracts-ready": "tsx scripts/run-oxlint.ts .",
-    "lint:fix": "npm run build:lib:host && npm run lint:fix:contracts-ready",
+    "lint:fix": "turbo run build:lib:host lint:fix:contracts-ready",
     "lint:fix:contracts-ready": "tsx scripts/run-oxlint.ts --config .oxlintrc.staged.json packages/typert/generator/tests/fixtures/type-model --fix && tsx scripts/run-oxlint.ts . --fix",
     "duplication": "jscpd --config .jscpd.json packages scripts",
     "test": "vitest run",
@@ -62,7 +62,7 @@
     "check:node-compat": "tsx scripts/run-gates.ts node-compat",
     "knip": "knip --treat-config-hints-as-errors",
     "publint": "tsx scripts/publint-all.ts",
-    "doc-typecheck": "npm run build:lib:host && npm run doc-typecheck:contracts-ready",
+    "doc-typecheck": "turbo run build:lib:host doc-typecheck:contracts-ready",
     "doc-typecheck:contracts-ready": "tsx scripts/doc-typecheck.ts",
     "verify-md-wrap": "tsx scripts/verify-md-wrap.ts",
     "verify-md-links": "tsx scripts/verify-md-links.ts",
@@ -177,9 +177,9 @@
     "spdx-expression-parse": "^5.0.0",
     "tsdown": "^0.22.2",
     "tsx": "^4.22.4",
+    "turbo": "^2.10.10",
     "typescript": "^6.0.3",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.8",
-    "turbo": "^2.10.10"
+    "vitest": "^4.1.8"
   }
 }
